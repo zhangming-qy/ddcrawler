@@ -1,0 +1,40 @@
+package com.ddcrawler.map;
+
+import com.ddcrawler.DdCrawlerApplication;
+import com.ddcrawler.entity.MsgSites;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+
+@RunWith(SpringRunner.class)
+@SpringBootTest(classes = {DdCrawlerApplication.class, MsgSitesMap.class})
+public class MsgSitesMapTest {
+
+    @Autowired
+    MsgSitesMap msgSitesMap;
+
+    @Test
+    public void insert() {
+        MsgSites msgSites = new MsgSites();
+        msgSites.setDomain_name("http");
+        Assert.assertNotNull(msgSitesMap.insert(msgSites));
+    }
+
+    @Test
+    public void selectByDomain() {
+        MsgSites msgSites = new MsgSites();
+        msgSites.setDomain_name("http:domain1");
+        Assert.assertNotNull(msgSitesMap.insert(msgSites));
+
+        MsgSites msgSites2 = new MsgSites();
+        msgSites2.setDomain_name("http:domain2");
+        Assert.assertNotNull(msgSitesMap.insert(msgSites2));
+
+        MsgSites msgSitesByDomain = msgSitesMap.selectByDomain("http:domain2");
+        Assert.assertNotNull(msgSitesByDomain);
+        Assert.assertEquals("DOMAIN NAME","http:domain2", msgSitesByDomain.getDomain_name());
+    }
+}
