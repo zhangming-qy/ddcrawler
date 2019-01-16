@@ -28,6 +28,9 @@ public interface AppTaskMap {
     @Select("select id, root_url, group_name, order_num, jclass, status, curr_url, last_url, created_time, modified_time from app_tasks")
     List<AppTask> getAll();
 
+    @Select("select id, root_url, group_name, order_num, jclass, status, curr_url, last_url, created_time, modified_time from app_tasks where group_name = #{group_name}")
+    List<AppTask> getAppTasksByGroup(@Param("group_name") String group_name);
+
     @Insert("insert into app_tasks(root_url,group_name,order_num,jclass,status,last_url,created_time, modified_time) values (#{root_url},#{group_name},#{order_num},#{jclass},#{status},#{last_url},now(),now())")
     @Options(useGeneratedKeys = true, keyColumn = "id", keyProperty = "id")
     Integer insert(AppTask appTask);

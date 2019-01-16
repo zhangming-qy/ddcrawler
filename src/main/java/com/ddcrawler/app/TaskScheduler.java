@@ -3,6 +3,9 @@ package com.ddcrawler.app;
 import com.ddcrawler.entity.AppTask;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.ApplicationContext;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -117,5 +120,60 @@ public class TaskScheduler {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static void restart(){
+        if(futureHashMap.isEmpty() && futureList.isEmpty()) {
+            CommandLineRunner taskRunner = ApplicationContextProvider.getBean("taskRunner", CommandLineRunner.class);
+            ApplicationArguments args = ApplicationContextProvider.getBean(ApplicationArguments.class);
+            try {
+                taskRunner.run(args.getSourceArgs());
+                log.info("Scheduled executor restart successfully!");
+            }
+            catch (Exception e){
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public static void shutdown(){
+        //just cancel all tasks, that make it can restart
+        cancel();
+
+/*        try {
+            //Cancel scheduled but not started task, and avoid new ones
+            scheduledExecutor.shutdown();
+
+            //Wait for the running tasks
+            scheduledExecutor.awaitTermination(30, TimeUnit.SECONDS);
+
+            //Interrupt the threads and shutdown the scheduler
+            scheduledExecutor.shutdownNow();
+            log.info("Scheduled executor have been shutdown.");
+        }
+        catch (InterruptedException e){
+            e.printStackTrace();
+        }*/
+    }
+
+    public static void cancel(){
+
+        ListIterator<ScheduledFuture<?>> futureListIterator = futureList.listIterator();
+        while (futureListIterator.hasNext()){
+            ScheduledFuture<?> scheduledFuture = futureListIterator.next();
+            scheduledFuture.cancel(true);
+            futureListIterator.remove();
+        }
+
+        Iterator<Map.Entry<String, Future<AppTask>>> entries = futureHashMap.entrySet().iterator();
+
+        while (entries.hasNext()) {
+            Map.Entry<String, Future<AppTask>> entry = entries.next();
+            Future<AppTask> fs = entry.getValue();
+            fs.cancel(true);
+            entries.remove();
+        }
+
+        log.info("All scheduled tasks have been canceled.");
     }
 }

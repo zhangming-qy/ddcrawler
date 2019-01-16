@@ -15,7 +15,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.*;
 
-@Component
+@Component("taskRunner")
 @Profile("!test")
 public class TaskRunner implements CommandLineRunner,Runnable {
 
