@@ -114,7 +114,6 @@ public class LvseSites implements ITaskRunner {
         }
         else if(document.text().contains("Status=403")){  //Access deny, hold request, and decrease priority.
             AppTask appTask = appTaskMan.getAppTask();
-            appTask.setOrder_num(appTask.getOrder_num()+1);
             appTask.setStatus(AppTaskStatus.HOLDING.name());
             appTaskMan.updateAppTasks();
             return;
@@ -167,9 +166,12 @@ public class LvseSites implements ITaskRunner {
         }
         else{
             nextLink = document.selectFirst("a[href]:contains(最后一页)");
-            if(getAppTask().getCurr_url() == null && nextLink != null){
+            AppTask appTask = getAppTask();
+            if(nextLink != null){
                 String lastPage = nextLink.absUrl("href");
-                appTaskMan.updateAppTasksCurrUrl(lastPage);
+                appTask.setCurr_url(lastPage);
+                appTask.setLast_url(lastPage);
+                appTaskMan.updateAppTasks();
             }
             log.info("This is the last page: " + url);
         }

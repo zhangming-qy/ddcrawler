@@ -19,7 +19,7 @@
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--路径-->
             <!-- winwods -->
-            <fileNamePattern>C:\Dev\logs\example.info.%d.log</fileNamePattern>
+            <fileNamePattern>C:\Dev\logs\ddcrawler.info.%d.log</fileNamePattern>
             <!--<fileNamePattern>/data/log/crawler.info.%d.log</fileNamePattern>-->
         </rollingPolicy>
     </appender>
@@ -34,7 +34,7 @@
         <!--滚动策略-->
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <!--路径-->
-            <fileNamePattern>C:\Dev\logs\example.error.%d.log</fileNamePattern>
+            <fileNamePattern>C:\Dev\logs\ddcrawler.error.%d.log</fileNamePattern>
             <!--<fileNamePattern>/data/log/crawler.error.%d.log</fileNamePattern>-->
         </rollingPolicy>
     </appender>

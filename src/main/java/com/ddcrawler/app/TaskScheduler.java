@@ -9,11 +9,13 @@ import org.springframework.context.ApplicationContext;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class TaskScheduler {
     private final static Logger log = LoggerFactory.getLogger(TaskScheduler.class);
     private final static ConcurrentHashMap<String, Future<AppTask>> futureHashMap = new ConcurrentHashMap<>(32);
     private final static List<ScheduledFuture<?>> futureList = new ArrayList<>(128);
+    private static volatile boolean isMaxAppTask = false;
 
     public final static int CORE_POOL_SIZE = Runtime.getRuntime().availableProcessors();
 
@@ -58,9 +60,14 @@ public class TaskScheduler {
        return futureList.size() + futureHashMap.size();
     }
 
+    public static boolean isAppTasksFull(){
+        return isMaxAppTask;
+    }
+
     public static Future<AppTask> submitAppTasks(AppTask appTask){
         //Tasks can't be more than core pool size
         if(futureHashMap.size() == CORE_POOL_SIZE){
+            isMaxAppTask = true;
             log.info("Reached the maximum {} tasks, can't submit any more.", CORE_POOL_SIZE);
             return null;
         }
@@ -107,6 +114,7 @@ public class TaskScheduler {
                 if(fs.isDone()){
                     AppTask appTask = fs.get();
                     futureHashMap.remove(entry.getKey());
+                    isMaxAppTask = false;
                     log.info("Task [id={}, root_url={}, group_name={}, java_class={}, status={}] execute finish.",
                             appTask.getId(),
                             appTask.getRoot_url(),
@@ -173,6 +181,8 @@ public class TaskScheduler {
             fs.cancel(true);
             entries.remove();
         }
+
+        isMaxAppTask = false;
 
         log.info("All scheduled tasks have been canceled.");
     }

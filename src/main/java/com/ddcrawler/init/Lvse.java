@@ -34,6 +34,9 @@ public class Lvse {
     @Value("${web.lvse.url}")
     private String web_url;
 
+    @Value("${web.lvse.country}")
+    private String web_country;
+
     @Value("${web.lvse.category}")
     private String web_catetory;
 
@@ -43,7 +46,7 @@ public class Lvse {
     @Value("${web.lvse.last}")
     private String web_last;
 
-    @RequestMapping("/init/lvse")
+    @RequestMapping("/init/lvse") // http://localhost:8080/init/lvse?url=http://www.lvse.cn/zhongguo
     public String initTask(@RequestParam("url") String url){
         StringBuilder stringBuilder = new StringBuilder();
 
@@ -55,27 +58,39 @@ public class Lvse {
             return "";
         }
 
-        Elements elems = document.select(web_catetory);
+        Elements regions = document.select(web_country);
 
-        for(Element elem : elems){
-            String link = elem.absUrl("href");
+        for(Element region : regions){
+            String regionUrl = region.absUrl("href");
+            document = util.getContent(regionUrl);
 
-            List<AppTask> appTasks = appTaskMap.getAppTasksByRootUrlAndJClass(link, LvseSites.class.getName());
+            if(document == null){
+                log.warn("Can't get content from " + regionUrl);
+                continue;
+            }
 
-            stringBuilder.append(link);
-            stringBuilder.append("<br>");
+            Elements elems = document.select(web_catetory);
 
-            if(appTasks.size() > 0) continue;
+            for(Element elem : elems){
+                String link = elem.absUrl("href");
 
-            AppTask appTask = new AppTask();
-            appTask.setRoot_url(link);
-            appTask.setGroup_name("lvse");
-            appTask.setOrder_num(elems.indexOf(elem));
-            appTask.setJclass(LvseSites.class.getName());
-            appTask.setStatus(AppTaskStatus.PENDING.name());
-            appTask.setCreated_time(new Timestamp(System.currentTimeMillis()));
-            appTask.setModified_time(new Timestamp(System.currentTimeMillis()));
-            appTaskMap.insert(appTask);
+                List<AppTask> appTasks = appTaskMap.getAppTasksByRootUrlAndJClass(link, LvseSites.class.getName());
+
+                stringBuilder.append(link);
+                stringBuilder.append("<br>");
+
+                if(appTasks.size() > 0) continue;
+
+                AppTask appTask = new AppTask();
+                appTask.setRoot_url(link);
+                appTask.setGroup_name("lvse");
+                appTask.setOrder_num(elems.indexOf(elem));
+                appTask.setJclass(LvseSites.class.getName());
+                appTask.setStatus(AppTaskStatus.PENDING.name());
+                appTask.setCreated_time(new Timestamp(System.currentTimeMillis()));
+                appTask.setModified_time(new Timestamp(System.currentTimeMillis()));
+                appTaskMap.insert(appTask);
+            }
         }
 
         return stringBuilder.toString();
@@ -98,6 +113,7 @@ public class Lvse {
 
                 Document docLink = util.getContent(root_url);
                 Element elemLast = docLink.selectFirst(web_last);
+                if(elemLast == null) continue;
                 String lastPage = elemLast.absUrl("href");
 
                 if(appTask.getLast_url() == null || !appTask.getLast_url().equals(lastPage)) {

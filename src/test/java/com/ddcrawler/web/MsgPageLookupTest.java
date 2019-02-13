@@ -23,7 +23,7 @@ public class MsgPageLookupTest {
 
     @Test
     public void getMsgSites() {
-        String url = "https://passport.111.com.cn/sso/register.action";
+        String url = "https://ucloud.bhuwifi.com/common/user/sign"; //"https://passport.111.com.cn/sso/register.action";
         MsgSites msgSites = msgPageLookup.getMsgSites(url, true);
         //Assert.assertEquals("https://passport.111.com.cn/sso/login.action", msgSites.getReg_url());
         Assert.assertNotNull(msgSites);
